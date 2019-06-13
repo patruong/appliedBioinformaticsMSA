@@ -1,0 +1,2 @@
+# appliedBioinformaticsMSA
+Applied Bioinformatics Project.
