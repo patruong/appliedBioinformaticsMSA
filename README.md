@@ -3,12 +3,17 @@
 ### Final project
 
 # ToDo
-Workflow:
+## Project Description []
+## Workflow []
 - folder noble [x]
 - data and bin manual [x]
 - define a final output []
-Github-pages
+## Github-pages []
 - own branch [x]
 - note book []
 - perconal information []
-
+## Master branch
+- dependencies []
+- versions of software []
+- install []
+- run []
