@@ -25,8 +25,11 @@
 
 
 # Problem definition
+0. Finish with cool plots (d3, bokeh, seaborn)
 1. Distance computation of tree.tsv
 2. Script to compute distance (dendroPy)
 3. Create Tree 
 4. Filter MSA on entropy
 5. Calculating entropy.
+6. ...
+7. Data 
