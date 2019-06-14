@@ -5,7 +5,7 @@
 | Person        |  E-mail         | Reference  |
 | ------------- |:-------------:| -----:|
 | [Juan Inda](https://www.chalmers.se/en/staff/Pages/inda.aspx)      | inda@chalmers.se | JI |
-|  Joel Ås     |       |  JÅ  |
+|  Joel Ås     |  joel.as@medsci.uu.se     |  JÅ  |
 | Patrick Truong |       |  PT   |
 
 
@@ -24,6 +24,7 @@ Put your reference JI, JÅ, PT and an explanation of what you do
     - Juan: Lab book
     - Patrick: gh-Pages
     - Joel: entropy
+        - Started script for calculating entropy `src/shannon_entropy_msa.py`
 
 #### 14.06.2019
 
@@ -32,5 +33,8 @@ Put your reference JI, JÅ, PT and an explanation of what you do
 ```bash
 results/lab_book.md
 ```
-
 - JÅ
+    - Finished `src/shannon_entropy_msa.py`
+        - Outputs filtered msa in fasta format to `stdout`
+        - saves filter scores in csv format
+    - Started script to tree comparison `src/compare_tree.py`
