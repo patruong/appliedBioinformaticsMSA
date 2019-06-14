@@ -7,8 +7,12 @@ import sys
 
 
 class EntropyOfAlignment:
-    def __init__(self):
+    def __init__(self, threshold, filter_output):
+        self.filter_threshold = threshold
+
+        self.sequence_length = None
         self.reads = dict()
+        self.filter_output_file = filter_output
         self.aa_abriviation = set(
             list("ARNDBCEQZGHILKMFPSTWYV-")
         )
@@ -37,6 +41,7 @@ class EntropyOfAlignment:
         if len(all_sequence_lengths) != 1:
             raise ImportError("Malformated file, multiple alignment lengths!")
 
+        self.sequence_length = list(all_sequence_lengths)[0]
         self.reads = read_dict
 
     def _calculate_frequencies_and_entropy_per_position(self):
@@ -62,15 +67,32 @@ class EntropyOfAlignment:
         entropy_per_pos = [_entropy(pos_freq.values()) for pos_freq in self.frequencies_per_position]
         self.entropy_per_position = entropy_per_pos
 
+    def _filter(self):
+        keep_index = [idx for idx in range(self.sequence_length) if
+                      self.entropy_per_position[idx] < self.filter_threshold]
+        for head, seq in self.reads.items():
+            filtered_seq = "".join(map(lambda idx: seq[idx], keep_index))
+            self.reads[head] = filtered_seq
+
+    def _write_filter_to_file(self):
+        with open(self.filter_output_file, "w+") as f:
+            f.write("Entropy")
+            f.write("\n".join(map(str, self.entropy_per_position)))
+            f.write("\n")
+
     def __str__(self):
         """ Write __str__ that output stdout as a one column csv"""
-        msg = "\n".join(map(str, self.entropy_per_position))
+        msg = ""
+        for header, seq in self.reads.items():
+            msg += f"{header}\n{seq}\n"
         return msg
 
     def run(self):
         """ run """
         self._parse_msa_file()
         self._calculate_frequencies_and_entropy_per_position()
+        self._write_filter_to_file()
+        self._filter()
         print(self)
 
 
@@ -79,12 +101,20 @@ def main():
         description="Calculate entropy per column in MSA."
                     "\n\tINPUT: stdin"
                     "\n\tOUTPUT: stdout"
-                    "\n\tUSAGE: ./shannon_entropy_msa < {input} > {output}",
+                    "\n\tUSAGE: ./shannon_entropy_msa t < {input} > {output}",
         formatter_class=argparse.RawTextHelpFormatter
     )
-    _ = parser.parse_args()
-    entropy_aling = EntropyOfAlignment()
-    entropy_aling.run()
+    parser.add_argument(
+        "threshold", type=float,
+        help="Entropy threshold for filtering"
+    )
+    parser.add_argument(
+        "filter_output", type=str,
+        help="Please provide location of filter file"
+    )
+    args = parser.parse_args(sys.argv[1:])
+    entropy_align = EntropyOfAlignment(args.threshold, args.filter_output)
+    entropy_align.run()
 
 
 if __name__ == '__main__':
