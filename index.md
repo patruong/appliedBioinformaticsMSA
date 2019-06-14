@@ -1,8 +1,8 @@
 
 # Table of Contents
 1. [Introduction](#introduction)
-2. [Project Description](#Project description)
-3. [Example2](#example2)
+2. [Project Description](#project-description)
+3. [Tools](#tools)
 4. [Third Example](#third-example)
 
 ## Introduction
@@ -11,7 +11,7 @@
 [Project Log]()
 
 ## Project description
-## Example2
+## Tools
 ## Third Example
 
 
