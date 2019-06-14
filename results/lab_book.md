@@ -24,3 +24,13 @@ Put your reference JI, JÅ, PT and an explanation of what you do
     - Juan: Lab book
     - Patrick: gh-Pages
     - Joel: entropy
+
+#### 13.06.2019
+
+- JI
+  - Updated the lab-book
+```bash
+results/lab_book.md
+```
+
+- JÅ
