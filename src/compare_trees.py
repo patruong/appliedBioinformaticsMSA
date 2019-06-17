@@ -1,33 +1,55 @@
 import argparse
 import sys
-import dendropy
+from dendropy import (
+    tree,
+    TaxonNameSpace
+)
 from dendropy.calculate import treecompare
 
 
-
-
-
-
-# tns = dendropy.TaxonNamespace()
-# tree1 = tree.get_from_path(
-#         "t1.nex",
-#         "nexus",
-#         taxon_namespace=tns)
-# tree2 = tree.get_from_path(
-#         "t2.nex",
-#         "nexus",
-#         taxon_namespace=tns)
-# tree1.encode_bipartitions()
-# tree2.encode_bipartitions()
-# print(treecompare.symmetric_difference(tree1, tree2))
-
 def read_forest(filenames, true_tree_file):
-    return 1,2
+    """
+    Reads files with Netwick formated trees into dendropy tree objects
+    :param filenames: array of paths to files to compare
+    :param true_tree_file: path to file of "true" tree
+    :return: array of dendropy trees and dendropy tree for "true" tree
+    """
+    def _read_tree_from_path(path, taxon_namespace):
+        """
+        Wrapper for netwick-file to dendropy tree
+        """
+        my_tree = tree.get_from_path(
+            path,
+            "netwick",
+            taxon_namespace=taxon_namespace
+        )
+        return my_tree
+
+    taxon_ns = TaxonNameSpace()  # needed
+    true_tree = _read_tree_from_path(true_tree_file, taxon_ns)
+    trees = [_read_tree_from_path(tree_path, taxon_ns) for tree_path in filenames]
+
+    return trees, true_tree
+
 
 def compute_distance(trees, true_tree):
+    """
+    Computes Robinson-Foulds distance between input trees and "true" tree
+    :param trees: dendropy tree top be compared to the "true" tree
+    :param true_tree: dentropy tree of the "true" tree
+    :return: key:value dict where key is filename of tree
+    """
+    # TODO: look into output format and act accordingly
     return None
 
+
 def format_and_print(distance_dict):
+    """
+    Prints tree distance in tab-seperated value format to stdout
+    :param distance_dict: result dict generated from `compute_distance`
+    :return: None
+    """
+    pass
 
 def main():
     parser = argparse.ArgumentParser(
@@ -48,7 +70,7 @@ def main():
         "trees_to_compare",
         nargs="+",
         type=str,
-        help="Paths to files containing trees in netwick format"
+        help="Paths to files containing trees in Netwick format"
     )
     args = parser.parse_args(sys.argv[1:])
 
