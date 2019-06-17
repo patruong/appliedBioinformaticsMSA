@@ -38,3 +38,9 @@ results/lab_book.md
         - Outputs filtered msa in fasta format to `stdout`
         - saves filter scores in csv format
     - Started script to tree comparison `src/compare_tree.py`
+
+
+#### 17.06.2019
+- JÅ
+    - added `FastTree` to bin
+    - Wrote code for reading `dendropy` trees from Newick files in `src/compare_trees.py`
