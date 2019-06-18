@@ -44,3 +44,11 @@ results/lab_book.md
 - JÅ
     - added `FastTree` to bin
     - Wrote code for reading `dendropy` trees from Newick files in `src/compare_trees.py`
+
+
+#### 18.06.2019
+- JÅ
+    - Finished and tested `compare_trees.py`
+    - Moved tested scripts to `bin`
+    - Wrote a config and a pair of Snakemake rules
+        - added `config.yml` for IO of workflow
