@@ -71,9 +71,9 @@ class EntropyOfAlignment:
         keep_index = [idx for idx in range(self.sequence_length) if
                       self.entropy_per_position[idx] < self.filter_threshold]
         if not keep_index:
-            print("No position passed filtering criteria. Inserting '-'", file=sys.stderr)
+            print("No position passed filtering criteria. Inserting 'X'", file=sys.stderr)
             for head, seq in self.reads.items():
-                self.reads[head] = "-"
+                self.reads[head] = "X"
         else:
             for head, seq in self.reads.items():
                 filtered_seq = "".join(map(lambda idx: seq[idx], keep_index))
