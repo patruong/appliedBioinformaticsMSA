@@ -13,6 +13,7 @@ def sample_trimmed_path(sample_list, experiment, method):
     trimmed_file_paths = [
         trimmed_file_path.format(id=sample)
         for sample in sample_list
+
     ]
     return trimmed_file_paths
 
@@ -37,7 +38,8 @@ for folder in config["input_folders"]:
     ]
 
 config["output"] = distance_output
-
+config["methods"] = ["filter_entropy_{}".format(thres) for thres in config["threshold"]]
+config["methods"].append("trimAl")
 
 #######################################################################
 #                           RULES                                     #
@@ -92,24 +94,23 @@ rule fast_tree:
 
 rule filter_entropy:
     params:
-        filter_entropy = config["methods"]["filter_entropy"],
-        threshold = 0.05
+        filter_entropy = config["filter_entropy"]
     input:
         "data/msa_trimming/{experiment}/{id}.msl"
     output:
-        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy/{id}_filter_entropy_trimmed.msl",
-        filter_stats = "run_folder/{experiment}/MSA/filter_entropy/{id}_filter_entropy_trimmed.csv"
+        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.msl",
+        filter_stats = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.csv"
 
     log:
-        "logs/filter_entropy/{experiment}_{id}.log"
+        "logs/filter_entropy/{experiment}_{threshold}_{id}.log"
     shell:
          """
-         {params.filter_entropy} {params.threshold} < {input} > {output}
+         {params.filter_entropy} {wildcards.threshold} {output.filter_stats} < {input} > {output.trimmed_msl} 2> {log}
          """
 
 rule trimal:
     params:
-        trimal = config["methods"]["trimAl"]
+        trimal = config["trimAl"]
     input:
          "data/msa_trimming/{experiment}/{id}.msl"
     output:
