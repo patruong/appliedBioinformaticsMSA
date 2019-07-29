@@ -61,7 +61,7 @@ class EntropyOfAlignment:
 
         def _entropy(x):
             """ Calculates Shannons entropy """
-            entropy = sum([-x_i * math.log2(x_i) for x_i in x])
+            entropy = -sum([x_i * math.log2(x_i) for x_i in x])
             return entropy
 
         entropy_per_pos = [_entropy(pos_freq.values()) for pos_freq in self.frequencies_per_position]
