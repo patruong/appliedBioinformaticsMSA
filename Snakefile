@@ -25,19 +25,21 @@ def sample_trimmed_path(sample_list, experiment, method):
 # Get all expected distance csv and their corresponding inputs
 # Add to config dict for later use
 distance_output = []
+config["output_report"] = []
 for folder in config["input_folders"]:
     # Get expected tsv_example
     msa_file_folder = os.path.basename(folder.rstrip("/"))
     distance_output.append("results/{experiment}/{{method}}_distance.tsv".format(
         experiment=msa_file_folder
     ))
+    config["output_report"].append(f"results/{msa_file_folder}/REPORT/Results_distance.html")
     # Get sample names in experiment folder
     config[msa_file_folder] = [
         os.path.basename(msa_file).replace(".msl", "")
         for msa_file in glob.glob(folder + "/*.msl")
     ]
 
-config["output"] = distance_output
+config["output_distance"] = distance_output
 config["methods"] = ["filter_entropy_{}".format(thres) for thres in config["threshold"]]
 config["methods"].append("trimAl")
 
@@ -48,8 +50,20 @@ config["methods"].append("trimAl")
 rule all:
     """ Controlls expected output from workflow """
     input:
-         expand(config["output"], method=config["methods"])
+         expand(config["output_distance"], method=config["methods"]),
+         config["output_report"]
 
+
+rule generate_infographics:
+    input:
+        expand("results/{{experiment}}/{method}_distance.tsv", method=config["methods"])
+    output:
+        "results/{experiment}/REPORT/Results_distance.html"
+    shell:
+        """
+        mkdir -p results/{wildcards.experiment}/REPORT
+        Rscript -e "rmarkdown::render('bin/infographics.Rmd', output_file = '../{output}')" --args {input}
+        """
 
 rule compute_distance:
     """

@@ -1,0 +1,56 @@
+---
+title: "Untitled"
+author: "Joel s"
+date: "29 July 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(reshape2)
+library(plotly)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r parse_input, include=FALSE}
+read_distances <- function(distance_files){
+  for (filename in distance_files){
+    filename = paste("..", filename, sep="/")
+    method_name <- gsub("_distance.tsv", "", tail(strsplit(filename, "/")[[1]], n=1))
+    distance_table <- read.csv(filename, stringsAsFactors = FALSE, check.names = FALSE, sep ="\t")
+    distance_table[method_name] <- distance_table$distance
+    distance_table$distance   <- NULL
+    distance_table$tree_label <- sapply(distance_table$tree_label,
+                                        function(x) strsplit(x, "_")[[1]][1])
+    if (exists("full_distance_table")){
+      full_distance_table = merge(full_distance_table, distance_table, by="tree_label")
+    } else {
+      full_distance_table = distance_table
+    }
+  }
+  return(full_distance_table)
+}
+
+in_args = commandArgs(TRUE)
+if (length(in_args) < 1){
+  stop("No input recived!")
+}
+distance_df <- read_distances(in_args[-1])
+
+```
+
+
+```{R plotting}
+distance_df_melt <- melt(distance_df, id="tree_label", value.name="Distance")
+
+plot_ly(distance_df_melt, x=~variable, y=~Distance, color=~variable, type = "box")
+
+```
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
