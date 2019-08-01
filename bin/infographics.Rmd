@@ -135,7 +135,7 @@ ggplotly(p)
 ```
 
 ```{r entropy_distribution, echo=FALSE}
-p <- ggplot(alignment_entropy_data, aes(x=Entropyi)) + 
+p <- ggplot(alignment_entropy_data, aes(x=Entropy)) + 
   geom_density(aes(fill="red"), alpha = 0.7) +
   geom_vline(data=sd_mean, aes(xintercept=Threshold), linetype="dashed") +
   theme_bw() +
