@@ -21,7 +21,6 @@ threshold:
   - 0.9
   - 1.0
 
-# TODO: Write rules that run these methods accordingly
 ######################### SOFTWARE ######################
 
 filter_entropy:     "bin/shannon_entropy_msa.py"
