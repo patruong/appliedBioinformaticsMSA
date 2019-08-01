@@ -81,7 +81,7 @@ class EntropyOfAlignment:
 
     def _write_filter_to_file(self):
         with open(self.filter_output_file, "w+") as f:
-            f.write("Entropy")
+            f.write("Entropy\n")
             f.write("\n".join(map(str, self.entropy_per_position)))
             f.write("\n")
 
