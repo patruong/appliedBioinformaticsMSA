@@ -52,3 +52,12 @@ results/lab_book.md
     - Moved tested scripts to `bin`
     - Wrote a config and a pair of Snakemake rules
         - added `config.yml` for IO of workflow
+
+
+#### 2.07.2019
+- JÅ 
+   - Added entropy cut-off as a wildcard for for experiment setup. This means that each threshold should be defined in `config.yml` and each experiment folder defined will run with those cut-offs  
+
+ 29.07.2019
+- JÅ
+    - Wrote automatic plotting of results per experiment folder
