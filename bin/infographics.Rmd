@@ -8,11 +8,17 @@ output: html_document
 ```{r setup, include=FALSE}
 library(reshape2)
 library(plotly)
+library(ggplot2)
+library(plyr)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r parse_input, include=FALSE}
+```{r functions, include=FALSE}
+# read_distance(distance_file)
+# INPUT: distance_file, List of paths to tsv with distance measurements
+# OUTPUT: distance_df, dataframe with with MSA-file per row. Columns are methods used
+## BRIEF: Merge all distance tsv files to one dataframe.
 read_distances <- function(distance_files){
   for (filename in distance_files){
     filename = paste("..", filename, sep="/")
@@ -31,26 +37,116 @@ read_distances <- function(distance_files){
   return(full_distance_table)
 }
 
+get_entropy_data <- function(experiment) {
+  experiment_entropy_dir <- paste("../run_folder", experiment, "MSA", sep = "/")
+  entropy_dirs <- list.files(experiment_entropy_dir)
+  entropy_dirs <- entropy_dirs[entropy_dirs != "trimAl"]
+  if (length(entropy_dirs) == 0){ stop(paste0("No entropy data for experiment ", experiment)) }
+  e_dir =  entropy_dirs[1]
+  path_e_dir <- paste(experiment_entropy_dir, e_dir, sep = "/")
+  alignment_entropy_files <- list.files(path_e_dir,
+                                        pattern = "trimmed.csv",
+                                        full.names = TRUE)
+  alignment_entropy_data <- 
+    ldply(alignment_entropy_files,
+          function(f) {
+           tmp = read.csv(f, stringsAsFactors = FALSE, check.names = FALSE)
+           read_name <- gsub(
+             "_filter_entropy_[0-9\\.]+_trimmed.csv",
+             "",
+             basename(f))
+           tmp$read_name <- read_name
+           return(tmp)
+           })
+  alignment_entropy_data$Entropy <- as.numeric(alignment_entropy_data$Entropy)
+  return(alignment_entropy_data)
+}
+
+# get_experiment(path_to_result_file)
+# INPUT: path_to_result_file, path to a input result file 
+# OUTPUT: experiment, string of experiment
+## BRIEF: returns experiment name
+get_experiment <- function(path_to_result_file){
+  experiment <- tail(strsplit(path_to_result_file, "/")[[1]], n=2)[1]
+  return(experiment)
+}
+
+# Code copied from http://www.sthda.com/english/wiki/ggplot2-line-plot-quick-start-guide-r-software-and-data-visualization
+data_summary <- function(data, varname, groupnames){
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+ return(data_sum)
+}
+```
+
+```{r parse_input, include=FALSE}
 in_args = commandArgs(TRUE)
 if (length(in_args) < 1){
   stop("No input recived!")
 }
 distance_df <- read_distances(in_args[-1])
-
+experiment <- get_experiment(in_args[2])
+alignment_entropy_data <- get_entropy_data(experiment)
 ```
 
+# Output results for experiment: `r experiment`
+Input for generated plots are:
+`r for (file in inargs[-1]) {paste0("- ", file)}
 
-```{R plotting}
+Observe that this setup is assumnes allinput for an experiment to be located in the same folder and all files have the same reads.
+```{r boxplot, echo=FALSE}
 distance_df_melt <- melt(distance_df, id="tree_label", value.name="Distance")
-
 plot_ly(distance_df_melt, x=~variable, y=~Distance, color=~variable, type = "box")
-
 ```
 
+```{r line, echo=FALSE}
+distance_df_delta_trimAl <- distance_df
+distance_df_delta_trimAl[, -1] <- distance_df_delta_trimAl[, -1] - distance_df_delta_trimAl[, ncol(distance_df_delta_trimAl[, -1])]
+distance_df_delta_trimAl$trimAl <- NULL
 
-## R Markdown
+distance_df_delta_trimAl <- melt(distance_df_delta_trimAl, id="tree_label", value.name="Distance")
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+distance_df_delta_trimAl$Threshold <- sapply(distance_df_delta_trimAl$variable, function(x) gsub("filter_entropy_","", x))
+distance_df_delta_trimAl$Threshold <- as.numeric(distance_df_delta_trimAl$Threshold)
+distance_df_delta_trimAl$variable <- NULL
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+sd_mean <- data_summary(
+  distance_df_delta_trimAl, 
+  varname = "Distance",
+  groupnames = c("Threshold"))
+sd_mean$ymin <- sd_mean$Distance - sd_mean$sd
+sd_mean$ymax <- sd_mean$Distance + sd_mean$sd
+
+ 
+p <- ggplot(sd_mean, aes(x=Threshold, y=Distance, color=Distance)) +
+  geom_errorbar(aes(ymin=ymin, ymax=ymax)) +
+  geom_point() +
+  theme_bw() +
+  ggtitle(paste0("Distance of entropy trimming to TrimAl: experiment ", experiment)) +
+  xlab("Entropy filter threshold") +
+  ylab("\u0394 Robinson-Foulds distance")
+
+ggplotly(p)
+```
+
+```{r entropy_distribution, echo=FALSE}
+p <- ggplot(alignment_entropy_data, aes(x=Entropyi)) + 
+  geom_density(aes(fill="red"), alpha = 0.7) +
+  geom_vline(data=sd_mean, aes(xintercept=Threshold), linetype="dashed") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  xlab("Entropy") +
+  ylab("Density") +
+  ggtitle(paste0("Density distribution of entropy of all ", length(unique(alignment_entropy_data$read_name))," reads"))
+  
+
+ggplotly(p)
+``` 
+
+
 
