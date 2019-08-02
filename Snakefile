@@ -59,10 +59,12 @@ rule generate_infographics:
         expand("results/{{experiment}}/{method}_distance.tsv", method=config["methods"])
     output:
         "results/{experiment}/REPORT/Results_distance.html"
+    log:
+        "logs/Infographics/{experiment}.log"
     shell:
         """
         mkdir -p results/{wildcards.experiment}/REPORT
-        Rscript -e "rmarkdown::render('bin/infographics.Rmd', output_file = '../{output}')" --args {input}
+        Rscript -e "rmarkdown::render('bin/infographics.Rmd', output_file = '../{output}')" --args {input} 2> {log}
         """
 
 rule compute_distance:
@@ -88,7 +90,7 @@ rule compute_distance:
         "logs/distance/{experiment}_{method}.log"
     shell:
          """
-         python {params.compute_dist} {input.true_tree} {input.msa_files} > {output}
+         python {params.compute_dist} {input.true_tree} {input.msa_files} > {output} 2> {log}
          """
 
 
@@ -112,15 +114,12 @@ rule filter_entropy:
     input:
         "data/msa_trimming/{experiment}/{id}.msl"
     output:
-        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.msl",
-        filter_stats = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.csv"
-
+        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.msl"
     log:
         "logs/filter_entropy/{experiment}_{threshold}_{id}.log"
-    shell:
-         """
-         {params.filter_entropy} {wildcards.threshold} {output.filter_stats} < {input} > {output.trimmed_msl} 2> {log}
-         """
+    run:
+         entropy_output = f"run_folder/{wildcards.experiment}/Entropy/{wildcards.id}_entropy.tsv"
+         shell(f"{params.filter_entropy} {wildcards.threshold} {entropy_output} < {input} > {output.trimmed_msl} 2> {log}")
 
 rule trimal:
     params:

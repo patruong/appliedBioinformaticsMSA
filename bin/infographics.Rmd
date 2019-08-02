@@ -37,22 +37,23 @@ read_distances <- function(distance_files){
   return(full_distance_table)
 }
 
+# get_entropy_data(experimenet)
+# INPUT: experimenet, folder to entropy data
+# OUTPUT: alignment_entropy_data, dataframe of all entopy per read
+## BRIEF: concaninates all read entropy form all reads in experiment
 get_entropy_data <- function(experiment) {
-  experiment_entropy_dir <- paste("../run_folder", experiment, "MSA", sep = "/")
-  entropy_dirs <- list.files(experiment_entropy_dir)
-  entropy_dirs <- entropy_dirs[entropy_dirs != "trimAl"]
-  if (length(entropy_dirs) == 0){ stop(paste0("No entropy data for experiment ", experiment)) }
-  e_dir =  entropy_dirs[1]
-  path_e_dir <- paste(experiment_entropy_dir, e_dir, sep = "/")
-  alignment_entropy_files <- list.files(path_e_dir,
-                                        pattern = "trimmed.csv",
+  experiment_entropy_dir <- paste("../run_folder", experiment, "Entropy", sep = "/")
+  alignment_entropy_files <- list.files(experiment_entropy_dir,
+                                        pattern = "_entropy.tsv",
                                         full.names = TRUE)
+  if (length(alignment_entropy_files) == 0){ stop(paste0("No entropy data for experiment ", experiment)) }
+
   alignment_entropy_data <- 
     ldply(alignment_entropy_files,
           function(f) {
            tmp = read.csv(f, stringsAsFactors = FALSE, check.names = FALSE)
            read_name <- gsub(
-             "_filter_entropy_[0-9\\.]+_trimmed.csv",
+             "_entropy.tsv",
              "",
              basename(f))
            tmp$read_name <- read_name

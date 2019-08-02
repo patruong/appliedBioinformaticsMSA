@@ -1,18 +1,18 @@
 #!/usr/bin/python3.6m
 import re
-from   collections  import Counter
+from collections import Counter
 import math
 import argparse
 import sys
+import os
 
 
 class EntropyOfAlignment:
     def __init__(self, threshold, filter_output):
         self.filter_threshold = threshold
-
         self.sequence_length = None
         self.reads = dict()
-        self.filter_output_file = filter_output
+        self.filter_output_file = re.sub("__[0-9.]+__", "", filter_output)
         self.aa_abriviation = set(
             list("ARNDBCEQZGHILKMFPSTWYV-")
         )
@@ -44,8 +44,27 @@ class EntropyOfAlignment:
         self.sequence_length = list(all_sequence_lengths)[0]
         self.reads = read_dict
 
+    def _entropy_file_exists(self):
+        """ Check if entropy already have been calculated"""
+        dirname = os.path.dirname(self.filter_output_file)
+        os.makedirs(dirname, exist_ok=True)
+        if os.path.isfile(self.filter_output_file):
+            try:
+                with open(self.filter_output_file, "r") as f:
+                    entropy_per_position = f.readlines()[1:]  # Remove header
+                    entropy_per_position = list(map(int, entropy_per_position))
+                if len(entropy_per_position) != self.sequence_length:
+                    raise ValueError("Wrong sequence length of entropy")
+            except (ValueError, FileNotFoundError) as e:
+                print(str(e), file=sys.stderr)
+                return False
+
+            self.entropy_per_position = entropy_per_position
+            return True
+
     def _calculate_frequencies_and_entropy_per_position(self):
         """ Calculates Shannon entropy per column and stores it in object """
+
         def _calculate_freq(aa_list, seq_len):
             """ Calculates each frequency per variable in column"""
             count_dict = dict(Counter(aa_list))
@@ -95,8 +114,9 @@ class EntropyOfAlignment:
     def run(self):
         """ run """
         self._parse_msa_file()
-        self._calculate_frequencies_and_entropy_per_position()
-        self._write_filter_to_file()
+        if not self._entropy_file_exists():
+            self._calculate_frequencies_and_entropy_per_position()
+            self._write_filter_to_file()
         self._filter()
         print(self)
 

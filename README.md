@@ -70,3 +70,38 @@ The resulting distance files are save under `results/{experiment}` and a HTML re
 ### Intermediary files
 All intermediary files are found under `run_folder`
 All generated trees can be found in Newick format under `run_folder/{experiment}/Trees/{method_used}/` while all filtered MSA and entropy measurements can be found under `run_folder/{experiment}/MSA/{method_used}/`. The saved entropy per is saved as `my_filtered_alignment_id.csv` and filtered MSA as `my_filtered_alignment_id.msl`
+
+
+
+# ToDo
+## Project Description [ x ]
+## Workflow [  ]
+- folder noble [ x ]
+- data and bin manual [ x ]
+- define a final output []
+## Github-pages []
+- own branch [x] 
+- note book [] (Juan)
+- personal information [] (Patrick)
+- Aims and rational [ x ] \(Joel\)
+## Master branch
+- dependencies [ x ]
+- versions of software [ x ]
+- install [ x ]
+- run [ x ]
+## Problem statement
+- Compute the MSA [ x ]
+- Time the MSA []
+- Infer a phylogeny from the trimmed MSA [ x ]
+
+
+# Problem definition
+0. Finish with cool plots (d3, bokeh, seaborn)
+1. Distance computation of tree.tsv
+2. Script to compute distance (dendroPy)
+3. Create Tree 
+4. Filter MSA on entropy
+5. Calculating entropy.
+6. ...
+7. Data 
+
