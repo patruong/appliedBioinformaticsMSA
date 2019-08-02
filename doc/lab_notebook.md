@@ -58,6 +58,10 @@ results/lab_book.md
 - JÅ 
    - Added entropy cut-off as a wildcard for for experiment setup. This means that each threshold should be defined in `config.yml` and each experiment folder defined will run with those cut-offs  
 
- 29.07.2019
+#### 29.07.2019
 - JÅ
     - Wrote automatic plotting of results per experiment folder
+
+#### 2.08.2019
+- JÅ
+    - Rewrote the entropy workflow as to remove unnecessary calculations
