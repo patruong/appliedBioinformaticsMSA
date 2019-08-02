@@ -58,7 +58,7 @@ Place the experimental data you with to run into a folder under `data/`, write t
 
 ## Running
 After defining your input_folder(s) please add desired threshold parameters under `PARAMETERS` in your `config.yml`.
-Now just run `snakemake` like in your project foöder:
+Now just run `snakemake` like in your project folder:
 
 ```
 snakemake -j 8 # dependent on number of cores.
@@ -69,8 +69,10 @@ The resulting distance files are save under `results/{experiment}` and a HTML re
 
 ### Intermediary files
 All intermediary files are found under `run_folder`
-All generated trees can be found in Newick format under `run_folder/{experiment}/Trees/{method_used}/` while all filtered MSA and entropy measurements can be found under `run_folder/{experiment}/MSA/{method_used}/`. The saved entropy per is saved as `my_filtered_alignment_id.csv` and filtered MSA as `my_filtered_alignment_id.msl`
 
+- Generated trees in Newick format `run_folder/{experiment}/Trees/{trimming_method}/{read_id}.tree`
+- Trimmed MSA found under `run_folder/{experiment}/MSA/{trimming_method}/{read_id}.msl`
+- Entropy calculations under `run_folder/{experiment}/Entropy/{read_id}_entropy.tsv`
 
 
 # ToDo
