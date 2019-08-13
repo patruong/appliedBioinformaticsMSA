@@ -102,7 +102,7 @@ rule fast_tree:
     output:
         "run_folder/{experiment}/Trees/{method}/{id}_{method}_trimmed.tree"
     log:
-        "logs/FastTree/{experiment}_{id}.log"
+        "logs/FastTree/{experiment}_{method}_{id}.log"
     shell:
          """
          {params.fasttree} {input} > {output} 2> {log}
