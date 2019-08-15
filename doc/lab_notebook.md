@@ -6,7 +6,7 @@
 | ------------- |:-------------:| -----:|
 | [Juan Inda](https://www.chalmers.se/en/staff/Pages/inda.aspx)      | inda@chalmers.se | JI |
 |  Joel Ås     |  joel.as@medsci.uu.se     |  JÅ  |
-| Patrick Truong |       |  PT   |
+| Patrick Truong |  ptruong@kth.se     |  PT   |
 
 
 ### Logs
