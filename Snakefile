@@ -132,5 +132,5 @@ rule trimal:
         "logs/trimAl/{experiment}_{id}.log"
     shell:
          """
-         {params.trimal} -in {input} > {output}
+         {params.trimal} -in {input} -out {output} -automated1
          """
