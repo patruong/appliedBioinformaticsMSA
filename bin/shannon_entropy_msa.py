@@ -8,7 +8,8 @@ import os
 
 
 class EntropyOfAlignment:
-    def __init__(self, threshold, filter_output):
+    def __init__(self, threshold, filter_output, output_filter=False):
+        self.read_entropy = bool(output_filter)
         self.filter_threshold = threshold
         self.sequence_length = None
         self.reads = dict()
@@ -18,6 +19,12 @@ class EntropyOfAlignment:
         )
         self.frequencies_per_position = list()
         self.entropy_per_position = []
+
+        self._parse_msa_file()
+        if not self.read_entropy:
+            success = self._read_entropy_file()
+            if not success:
+                raise ImportError("Error importing entropy: " + filter_output)
 
     def _parse_msa_file(self):
         """ Read file and geat each alignment for each read """
@@ -44,15 +51,15 @@ class EntropyOfAlignment:
         self.sequence_length = list(all_sequence_lengths)[0]
         self.reads = read_dict
 
-    def _entropy_file_exists(self):
+    def _read_entropy_file(self):
         """ Check if entropy already have been calculated"""
         dirname = os.path.dirname(self.filter_output_file)
         os.makedirs(dirname, exist_ok=True)
         if os.path.isfile(self.filter_output_file):
             try:
                 with open(self.filter_output_file, "r") as f:
-                    entropy_per_position = f.readlines()[1:]  # Remove header
-                    entropy_per_position = list(map(int, entropy_per_position))
+                    entropy_per_position = [l.strip() for l in f.readlines()[1:]]  # Remove header
+                    entropy_per_position = list(map(float, entropy_per_position))
                 if len(entropy_per_position) != self.sequence_length:
                     raise ValueError("Wrong sequence length of entropy")
             except (ValueError, FileNotFoundError) as e:
@@ -113,12 +120,12 @@ class EntropyOfAlignment:
 
     def run(self):
         """ run """
-        self._parse_msa_file()
-        if not self._entropy_file_exists():
+        if self.read_entropy:
             self._calculate_frequencies_and_entropy_per_position()
             self._write_filter_to_file()
-        self._filter()
-        print(self)
+        else:
+            self._filter()
+            print(self)
 
 
 def main():
@@ -137,8 +144,9 @@ def main():
         "filter_output", type=str,
         help="Please provide location of filter file"
     )
+    parser.add_argument("--output-filter", help="Write filter", action="store_true")
     args = parser.parse_args(sys.argv[1:])
-    entropy_align = EntropyOfAlignment(args.threshold, args.filter_output)
+    entropy_align = EntropyOfAlignment(args.threshold, args.filter_output, args.output_filter)
     entropy_align.run()
 
 

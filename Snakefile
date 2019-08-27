@@ -7,8 +7,21 @@ import glob
 #######################################################################
 #                           FUNCTIONS                                 #
 #######################################################################
+# Thank you @kichik stackoverflow
+def frange(x, y, jump):
+  while x < y:
+    yield x
+    x += jump
+
 
 def sample_trimmed_path(sample_list, experiment, method):
+    """
+    Get all trees id from experiemnt given method method wildcard
+    :param sample_list: list of all ids, given input folder
+    :param experiment: name of input folder
+    :param method: method used to calculate tree
+    :return: List of paths to requested trees
+    """
     trimmed_file_path = f"run_folder/{experiment}/Trees/{method}/{{id}}_{method}_trimmed.tree"
     trimmed_file_paths = [
         trimmed_file_path.format(id=sample)
@@ -17,6 +30,29 @@ def sample_trimmed_path(sample_list, experiment, method):
     ]
     return trimmed_file_paths
 
+
+def infographics_input(wildcards):
+    """
+    Get entropy interval and ask for those files (OBS: checkpoint)
+    :param wildcards: wildcard.experiment
+    :return: list of paths to requested method dependent method
+    """
+    with open(checkpoints.get_entropy_interval.get(experiment=wildcards.experiment).output[0], "r") as f:
+        entropy_min, entropy_max = map(float, f.readlines()[1].strip().split("\t"))
+        min_max = frange(entropy_min, entropy_max, (entropy_max-entropy_min)/10)
+
+    methods = ["filter_entropy_{}".format(i) for i in min_max]
+    methods += ["trimAl"]
+
+    input_pattern = f"results/{wildcards.experiment}/{{method}}_distance.tsv"
+    info_input = [input_pattern.format(method=method) for method in methods]
+
+    return info_input
+
+def entropy_input(wildcards):
+    input_pattern = "run_folder/{experiment}/Entropy/{{id}}_entropy.tsv".format(experiment=wildcards.experiment)
+    entropy_files = [input_pattern.format(id=id) for id in config[wildcards.experiment]]
+    return entropy_files
 
 #######################################################################
 #                           CONFIG                                    #
@@ -29,9 +65,7 @@ config["output_report"] = []
 for folder in config["input_folders"]:
     # Get expected tsv_example
     msa_file_folder = os.path.basename(folder.rstrip("/"))
-    distance_output.append("results/{experiment}/{{method}}_distance.tsv".format(
-        experiment=msa_file_folder
-    ))
+
     config["output_report"].append(f"results/{msa_file_folder}/REPORT/Results_distance.html")
     # Get sample names in experiment folder
     config[msa_file_folder] = [
@@ -39,24 +73,19 @@ for folder in config["input_folders"]:
         for msa_file in glob.glob(folder + "/*.msl")
     ]
 
-config["output_distance"] = distance_output
-config["methods"] = ["filter_entropy_{}".format(thres) for thres in config["threshold"]]
-config["methods"].append("trimAl")
-
 #######################################################################
 #                           RULES                                     #
 #######################################################################
 
 rule all:
-    """ Controlls expected output from workflow """
+    """ Controls expected output from workflow """
     input:
-         expand(config["output_distance"], method=config["methods"]),
          config["output_report"]
 
 
 rule generate_infographics:
     input:
-        expand("results/{{experiment}}/{method}_distance.tsv", method=config["methods"])
+        infographics_input
     output:
         "results/{experiment}/REPORT/Results_distance.html"
     log:
@@ -112,14 +141,54 @@ rule filter_entropy:
     params:
         filter_entropy = config["filter_entropy"]
     input:
-        "data/msa_trimming/{experiment}/{id}.msl"
+        msa = "data/msa_trimming/{experiment}/{id}.msl",
+        entropy = "run_folder/{experiment}/Entropy/{id}_entropy.tsv"
+
     output:
         trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.msl"
     log:
         "logs/filter_entropy/{experiment}_{threshold}_{id}.log"
+    shell:
+         """
+         {params.filter_entropy} {wildcards.threshold} {input.entropy} < {input.msa} > {output.trimmed_msl} 2> {log}
+         """
+
+checkpoint get_entropy_interval:
+    input:
+        entropy_input
+    output:
+        entropy_interval = "run_folder/{experiment}/Entropy/entropy_min_max.tsv"
     run:
-         entropy_output = f"run_folder/{wildcards.experiment}/Entropy/{wildcards.id}_entropy.tsv"
-         shell(f"{params.filter_entropy} {wildcards.threshold} {entropy_output} < {input} > {output.trimmed_msl} 2> {log}")
+        c_min = 0
+        c_max = 0
+        for f_name in input:
+            with open(f_name, "r") as f:
+                lines = list(map(float,[l.strip() for l in f.readlines()][1:]))
+                tmp_max = max(lines)
+                tmp_min = min(lines)
+                if tmp_max > c_max: c_max = tmp_max
+                if tmp_min < c_min: c_min = tmp_min
+
+        with open(output.entropy_interval, "w+") as f:
+            f.write("Min\tMax\n")
+            f.write("{}\t{}\n".format(c_min, c_max))
+
+
+rule calculate_entropy:
+    params:
+        filter_entropy = config["filter_entropy"]
+    input:
+        msl = "data/msa_trimming/{experiment}/{id}.msl",
+    output:
+        entropy = "run_folder/{experiment}/Entropy/{id}_entropy.tsv"
+    log:
+        "logs/calculate_entropy/{experiment}_{id}.log"
+    shell:
+         """
+         {params.filter_entropy} 1 {output.entropy} --output-filter < {input} 2> {log}
+         """
+
+
 
 rule trimal:
     params:
