@@ -22,7 +22,7 @@ def sample_trimmed_path(sample_list, experiment, method):
     :param method: method used to calculate tree
     :return: List of paths to requested trees
     """
-    trimmed_file_path = f"run_folder/{experiment}/Trees/{method}/{{id}}_{method}_trimmed.tree"
+    trimmed_file_path = f"run_folder/{experiment}/Trees/{method}/{{id}}_{method}.tree"
     trimmed_file_paths = [
         trimmed_file_path.format(id=sample)
         for sample in sample_list
@@ -42,7 +42,7 @@ def infographics_input(wildcards):
         min_max = frange(entropy_min, entropy_max, (entropy_max-entropy_min)/10)
 
     methods = ["filter_entropy_{}".format(i) for i in min_max]
-    methods += ["trimAl"]
+    methods += ["trimAl", "unfiltered"]
 
     input_pattern = f"results/{wildcards.experiment}/{{method}}_distance.tsv"
     info_input = [input_pattern.format(method=method) for method in methods]
@@ -50,9 +50,26 @@ def infographics_input(wildcards):
     return info_input
 
 def entropy_input(wildcards):
+    """
+    Get all entropy filters from all reads in experiment folder
+    :param wildcards: wildcards.experiment to access reads under config[{config}}
+    :return: List of paths to each reads entropy file
+    """
     input_pattern = "run_folder/{experiment}/Entropy/{{id}}_entropy.tsv".format(experiment=wildcards.experiment)
     entropy_files = [input_pattern.format(id=id) for id in config[wildcards.experiment]]
     return entropy_files
+
+
+def msl_input(wildcards):
+    """
+    Connect unfiltered id to FastTree rule
+    :param wildcards:
+    :return:
+    """
+    if wildcards.method == "unfiltered":
+        return  f"data/msa_trimming/{wildcards.experiment}/{wildcards.id}.msl"
+    else:
+        return f"run_folder/{wildcards.experiment}/MSA/{wildcards.method}/{wildcards.id}_{wildcards.method}.msl"
 
 #######################################################################
 #                           CONFIG                                    #
@@ -127,9 +144,9 @@ rule fast_tree:
     params:
         fasttree = config["FastTree"]
     input:
-        "run_folder/{experiment}/MSA/{method}/{id}_{method}_trimmed.msl"
+        msl_input
     output:
-        "run_folder/{experiment}/Trees/{method}/{id}_{method}_trimmed.tree"
+        "run_folder/{experiment}/Trees/{method}/{id}_{method}.tree"
     log:
         "logs/FastTree/{experiment}_{method}_{id}.log"
     shell:
@@ -145,7 +162,7 @@ rule filter_entropy:
         entropy = "run_folder/{experiment}/Entropy/{id}_entropy.tsv"
 
     output:
-        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}_trimmed.msl"
+        trimmed_msl = "run_folder/{experiment}/MSA/filter_entropy_{threshold}/{id}_filter_entropy_{threshold}.msl"
     log:
         "logs/filter_entropy/{experiment}_{threshold}_{id}.log"
     shell:
@@ -196,7 +213,7 @@ rule trimal:
     input:
          "data/msa_trimming/{experiment}/{id}.msl"
     output:
-        "run_folder/{experiment}/MSA/trimAl/{id}_trimAl_trimmed.msl"
+        "run_folder/{experiment}/MSA/trimAl/{id}_trimAl.msl"
     log:
         "logs/trimAl/{experiment}_{id}.log"
     shell:

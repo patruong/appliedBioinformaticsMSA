@@ -97,7 +97,7 @@ alignment_entropy_data <- get_entropy_data(experiment)
 
 # Output results for experiment: `r experiment`
 Input for generated plots are:
-`r for (file in inargs[-1]) {paste0("- ", file)}`
+`r for (file in in_args[-1]) {paste0("- ", file)}`
 
 Observe that this setup is assumnes allinput for an experiment to be located in the same folder and all files have the same reads.
 ```{r boxplot, echo=FALSE}
