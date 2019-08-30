@@ -65,3 +65,8 @@ results/lab_book.md
 #### 2.08.2019
 - JÅ
     - Rewrote the entropy workflow as to remove unnecessary calculations
+
+#### 27.08.2019
+- JÅ
+    - Selected entropy threshold are now selected automatically
+
