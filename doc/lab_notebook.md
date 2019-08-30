@@ -70,3 +70,7 @@ results/lab_book.md
 - JÅ
     - Selected entropy threshold are now selected automatically
 
+#### 30.08.2019
+- JÅ
+    - Workflow for baseline unfiltered read distance from true phylo. Need to update graphs in `infographics.Rmd`
+
