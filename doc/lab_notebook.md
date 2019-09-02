@@ -74,3 +74,7 @@ results/lab_book.md
 - JÅ
     - Workflow for baseline unfiltered read distance from true phylo. Need to update graphs in `infographics.Rmd`
 
+#### 2.09.2019
+- JÅ
+    - Updated plots in `ìnfographics.Rmd`
+
