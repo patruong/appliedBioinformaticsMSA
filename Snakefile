@@ -39,7 +39,7 @@ def infographics_input(wildcards):
     """
     with open(checkpoints.get_entropy_interval.get(experiment=wildcards.experiment).output[0], "r") as f:
         entropy_min, entropy_max = map(float, f.readlines()[1].strip().split("\t"))
-        min_max = frange(entropy_min, entropy_max, (entropy_max-entropy_min)/10)
+        min_max = frange(entropy_min, entropy_max, (entropy_max-entropy_min)/config["nr_entropy_slices"])
 
     methods = ["filter_entropy_{}".format(i) for i in min_max]
     methods += ["trimAl", "unfiltered"]

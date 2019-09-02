@@ -106,31 +106,33 @@ plot_ly(distance_df_melt, x=~variable, y=~Distance, color=~variable, type = "box
 ```
 
 ```{r line, echo=FALSE}
-distance_df_delta_trimAl <- distance_df
-distance_df_delta_trimAl[, -1] <- distance_df_delta_trimAl[, -1] - distance_df_delta_trimAl[, ncol(distance_df_delta_trimAl[, -1])]
-distance_df_delta_trimAl$trimAl <- NULL
+distance_df_delta <- distance_df
+save_dist <- distance_df_delta[, "unfiltered"]
+distance_df_delta[, -1] <- distance_df_delta[, colnames(distance_df_delta[, -1])] -
+  distance_df_delta[, "unfiltered"]
+distance_df_delta$unfiltered <- NULL
 
-distance_df_delta_trimAl <- melt(distance_df_delta_trimAl, id="tree_label", value.name="Distance")
+distance_df_delta <- melt(distance_df_delta, id="tree_label", value.name="Distance", )
+round_col <- function(x){
+  if (grepl("^filter_entropy_", x, perl = T)){
+    value <- gsub("filter_entropy_","", x)
+    value <- round(as.numeric(value), digits = 3)
+    return(paste0("T: ", value))
+  }
+  return(as.character(x))
+}
+distance_df_delta$Method <- sapply(distance_df_delta$variable, function(x) round_col(x))
+distance_df_delta$variable <- NULL
 
-distance_df_delta_trimAl$Threshold <- sapply(distance_df_delta_trimAl$variable, function(x) gsub("filter_entropy_","", x))
-distance_df_delta_trimAl$Threshold <- as.numeric(distance_df_delta_trimAl$Threshold)
-distance_df_delta_trimAl$variable <- NULL
-
-sd_mean <- data_summary(
-  distance_df_delta_trimAl, 
-  varname = "Distance",
-  groupnames = c("Threshold"))
-sd_mean$ymin <- sd_mean$Distance - sd_mean$sd
-sd_mean$ymax <- sd_mean$Distance + sd_mean$sd
-
- 
-p <- ggplot(sd_mean, aes(x=Threshold, y=Distance, color=Distance)) +
-  geom_errorbar(aes(ymin=ymin, ymax=ymax)) +
-  geom_point() +
+p <- ggplot(distance_df_delta, aes(x=Distance, fill=Method)) +
+  facet_grid(Method~.) +
+  geom_density() +
   theme_bw() +
-  ggtitle(paste0("Distance of entropy trimming to TrimAl: experiment ", experiment)) +
+  geom_vline(aes(xintercept=0), linetype="dashed") +
+  ggtitle(paste0("\u0394 unfiltered to method used: experiment ", experiment)) +
   xlab("Entropy filter threshold") +
-  ylab("\u0394 Robinson-Foulds distance")
+  ylab("\u0394 Robinson-Foulds distance") +
+  theme(legend.position = "none")
 
 ggplotly(p)
 ```
@@ -138,7 +140,6 @@ ggplotly(p)
 ```{r entropy_distribution, echo=FALSE}
 p <- ggplot(alignment_entropy_data, aes(x=Entropy)) + 
   geom_density(aes(fill="red"), alpha = 0.7) +
-  geom_vline(data=sd_mean, aes(xintercept=Threshold), linetype="dashed") +
   theme_bw() +
   theme(legend.position = "none") +
   xlab("Entropy") +
