@@ -2,14 +2,14 @@
 ######################### INPUT   #######################
 input_folders:
   - "data/msa_trimming/asymmetric_0.5"
-#  - "data/msa_trimming/asymmetric_1.0"
+  - "data/msa_trimming/asymmetric_1.0"
   - "data/msa_trimming/asymmetric_2.0"
-#  - "data/msa_trimming/symmetric_0.5"
-#  - "data/msa_trimming/symmetric_1.0"
-#  - "data/msa_trimming/symmetric_2.0"
+  - "data/msa_trimming/symmetric_0.5"
+  - "data/msa_trimming/symmetric_1.0"
+  - "data/msa_trimming/symmetric_2.0"
 
 ######################### PARAMETERS ####################
-nr_entropy_slices: 4
+nr_entropy_slices: 15
 
 ######################### SOFTWARE ######################
 

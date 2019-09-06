@@ -97,8 +97,21 @@ for folder in config["input_folders"]:
 rule all:
     """ Controls expected output from workflow """
     input:
-         config["output_report"]
+        config["output_report"],
+        "results/plots/distribution_of_distances_trimal.png",
+        "results/plots/mean_with_error_bars.png"
 
+rule aggregate_plots:
+    input:
+        expand("results/{experiment}/REPORT/Results_distance.html", experiment = config["input_folders"])
+    output:
+        "results/plots/distribution_of_distances_trimal.png",
+        "results/plots/mean_with_error_bars.png"
+    shell:
+        """
+        mkdir -p results/plots
+        Rscript bin/plot_all.R
+        """
 
 rule generate_infographics:
     input:

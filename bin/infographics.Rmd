@@ -90,6 +90,7 @@ in_args = commandArgs(TRUE)
 if (length(in_args) < 1){
   stop("No input recived!")
 }
+print(in_args)
 distance_df <- read_distances(in_args[-1])
 experiment <- get_experiment(in_args[2])
 alignment_entropy_data <- get_entropy_data(experiment)
