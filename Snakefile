@@ -103,7 +103,7 @@ rule all:
 
 rule aggregate_plots:
     input:
-        expand("results/{experiment}/REPORT/Results_distance.html", experiment = config["input_folders"])
+        expand("results/{experiment}/REPORT/Results_distance.html", experiment = [os.path.basename(f) for f in config["input_folders"]])
     output:
         "results/plots/distribution_of_distances_trimal.png",
         "results/plots/mean_with_error_bars.png"

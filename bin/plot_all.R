@@ -87,14 +87,14 @@ mean_unfilterd <- summarise(mean_unfilterd, mean_dist = mean(Distance), sd_dist=
 mean_unfilterd$my_text <- rep("Unfiltered Mean", nrow(mean_unfilterd))
 
 # Distance diff
-g <- ggplot(mean_sd_entropy, aes(x=Threshold, y=mean_dist, color=Experiment)) +
-  geom_point() +
-  geom_line() +
-  geom_errorbar(aes(ymin = mean_dist-sd_dist, ymax = mean_dist+sd_dist),width=0.02) +
-  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist, color=Experiment), linetype="dashed") +
-  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist-sd_dist, color=Experiment), linetype="dashed") +
-  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist+sd_dist, color=Experiment), linetype="dashed") +
-  geom_text(data = mean_unfilterd, aes(x = 0.1, y=mean_dist -0.5, label=my_text), size = 3) +
+g <- ggplot(mean_sd_entropy, aes(x=Threshold, y=mean_dist)) +
+  geom_line(colour="#AA3939") +
+  geom_errorbar(aes(ymin = mean_dist-sd_dist, ymax = mean_dist+sd_dist), width=0.02, colour="#FB2424") +
+  geom_point(colour="#592E2E") +
+  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist, color=Experiment), linetype="dashed", colour="#165AF7") +
+  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist-sd_dist, color=Experiment), linetype="dashed", colour="#274EA8") +
+  geom_hline(data = mean_unfilterd, aes(yintercept=mean_dist+sd_dist, color=Experiment), linetype="dashed", colour="#274EA8") +
+  geom_text(data = mean_unfilterd, aes(x = 0.1, y=mean_dist -0.5, label=my_text), size = 3, colour="#222A3B") +
   facet_grid(.~Experiment) +
   theme_bw() +
   geom_hline(aes(yintercept=0), linetype="dashed") +
