@@ -2,7 +2,7 @@
 ## About
 Project for the Applied Bioinformatics course taken by participants of [**Medbioinfo**](http://www.medbioinfo.se/)
 
-This workflow is for trimming noisy regions from MSA using measurements of information entropy of said position. 
+This workflow is for trimming noisy regions from MSA using measurements of information entropy of said position. The threshold for entropy filtering will be set, with equal distance, from minimum observed entropy in experimental reads to maximum observed.
 
 ## Prerequisites
 + `Python 3.6`
@@ -39,25 +39,25 @@ Once `TrimAl` and `FastTree` is installed please open or create `config.yml` wit
 ######################### INPUT   #######################
 input_folders:
   - "data/my_MSA_folder"
-
+  - "data/my_other_msa_folder"
 ######################### PARAMETERS ####################
-# Add additional desired thresholds
-threshold:
-  - 0.1
-  - 0.2
+nr_entropy_slices: 5
 
 ######################### SOFTWARE ######################
+
 filter_entropy:     "bin/shannon_entropy_msa.py"
 trimAl:             "bin/trimAl/source/trimal"
 distance_calculate: "bin/compare_trees.py"
 FastTree:           "bin/FastTree"
+
 ```
 
 Please set the path to `TrimAl` and `FastTree` executables under `SOFTWARE`.
 Place the experimental data you with to run into a folder under `data/`, write the path to that folder. Please ensure that your MSA files are in `.msl` format.
 
 ## Running
-After defining your input_folder(s) please add desired threshold parameters under `PARAMETERS` in your `config.yml`.
+After defining your input_folder(s) please add desired number of threshold parameters under `PARAMETERS` in your `config.yml`.
+Observe that increasing the number of slices will add to the runtime.
 Now just run `snakemake` like in your project folder:
 
 ```
@@ -73,37 +73,3 @@ All intermediary files are found under `run_folder`
 - Generated trees in Newick format `run_folder/{experiment}/Trees/{trimming_method}/{read_id}.tree`
 - Trimmed MSA found under `run_folder/{experiment}/MSA/{trimming_method}/{read_id}.msl`
 - Entropy calculations under `run_folder/{experiment}/Entropy/{read_id}_entropy.tsv`
-
-
-# ToDo
-## Project Description [ x ]
-## Workflow [  ]
-- folder noble [ x ]
-- data and bin manual [ x ]
-- define a final output []
-## Github-pages []
-- own branch [x] 
-- note book [] (Juan)
-- personal information [] (Patrick)
-- Aims and rational [ x ] \(Joel\)
-## Master branch
-- dependencies [ x ]
-- versions of software [ x ]
-- install [ x ]
-- run [ x ]
-## Problem statement
-- Compute the MSA [ x ]
-- Time the MSA []
-- Infer a phylogeny from the trimmed MSA [ x ]
-
-
-# Problem definition
-0. Finish with cool plots (d3, bokeh, seaborn)
-1. Distance computation of tree.tsv
-2. Script to compute distance (dendroPy)
-3. Create Tree 
-4. Filter MSA on entropy
-5. Calculating entropy.
-6. ...
-7. Data 
-
